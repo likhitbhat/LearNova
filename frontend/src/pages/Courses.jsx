@@ -20,7 +20,9 @@ const Courses = () => {
         const fetchPremium = async () => {
             try {
                 const { data } = await api.get('/courses');
-                setPremiumCourses(data);
+                // Always include partner platforms in the catalog
+                const dbCourses = Array.isArray(data) ? data : [];
+                setPremiumCourses([...dbCourses, ...getFallbackPremium()]);
             } catch (err) {
                 console.warn('Could not fetch premium courses:', err.message);
                 setPremiumCourses(getFallbackPremium());
@@ -133,7 +135,7 @@ const Courses = () => {
                             <span className="material-icons-round absolute left-3 top-1/2 -translate-y-1/2 text-on-surface-variant text-lg">search</span>
                             <input
                                 type="text"
-                                placeholder="Search YouTube for any topic (e.g., 'Next.js', 'AI', 'Figma')..."
+                                placeholder="Search the web for any topic (e.g., 'Next.js', 'AI', 'Figma')..."
                                 className="input-field !pl-10 !bg-surface-container-low"
                                 value={searchQuery}
                                 onChange={(e) => {
@@ -162,7 +164,7 @@ const Courses = () => {
                             ) : (
                                 <>
                                     <span className="material-icons-round text-sm mr-1">search</span>
-                                    Search YouTube
+                                    Search the Web
                                 </>
                             )}
                         </button>
@@ -189,7 +191,7 @@ const Courses = () => {
                         <div className="mt-3 flex items-center justify-between">
                             <p className="text-xs text-on-surface-variant">
                                 {searchSubmitted && (
-                                    <span>Showing YouTube results for "<span className="font-semibold text-on-surface">{searchQuery}</span>"</span>
+                                    <span>Showing results for "<span className="font-semibold text-on-surface">{searchQuery}</span>"</span>
                                 )}
                                 {selectedCategory !== 'All' && (
                                     <span>{searchSubmitted ? ' · ' : ''}Category: <span className="font-semibold text-on-surface">{selectedCategory}</span></span>
@@ -216,7 +218,7 @@ const Courses = () => {
                                     <path d="M19.615 3.184c-3.604-.246-11.631-.245-15.23 0-3.897.266-4.356 2.62-4.385 8.816.029 6.185.484 8.549 4.385 8.816 3.6.245 11.626.246 15.23 0 3.897-.266 4.356-2.62 4.385-8.816-.029-6.185-.484-8.549-4.385-8.816zm-10.615 12.816v-8l8 3.993-8 4.007z" />
                                 </svg>
                             </div>
-                            <h2 className="text-xl font-bold text-on-surface">YouTube Results</h2>
+                            <h2 className="text-xl font-bold text-on-surface">Global Search Results</h2>
                             <span className="chip-free text-[10px]">{searchResults.length} found</span>
                         </div>
 
@@ -227,7 +229,7 @@ const Courses = () => {
                                         <path d="M19.615 3.184c-3.604-.246-11.631-.245-15.23 0-3.897.266-4.356 2.62-4.385 8.816.029 6.185.484 8.549 4.385 8.816 3.6.245 11.626.246 15.23 0 3.897-.266 4.356-2.62 4.385-8.816-.029-6.185-.484-8.549-4.385-8.816zm-10.615 12.816v-8l8 3.993-8 4.007z" />
                                     </svg>
                                 </div>
-                                <p className="text-sm text-on-surface-variant">Searching YouTube...</p>
+                                <p className="text-sm text-on-surface-variant">Searching the web...</p>
                             </div>
                         ) : searchResults.length > 0 ? (
                             <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3 stagger-children">
@@ -236,7 +238,7 @@ const Courses = () => {
                                 ))}
                             </div>
                         ) : (
-                            <EmptySection message={`No YouTube playlists found for "${searchQuery}". Try different keywords.`} />
+                            <EmptySection message={`No courses found for "${searchQuery}". Try different keywords.`} />
                         )}
                     </section>
                 )}
@@ -258,7 +260,7 @@ const Courses = () => {
                                     <div className="w-8 h-8 rounded-lg bg-gradient-primary flex items-center justify-center">
                                         <span className="material-icons-round text-white text-sm">star</span>
                                     </div>
-                                    <h2 className="text-xl font-bold text-on-surface">Premium Courses</h2>
+                                    <h2 className="text-xl font-bold text-on-surface">Partner & Premium Courses</h2>
                                     <span className="chip-primary text-[10px]">{filteredPremium.length}</span>
                                 </div>
 
@@ -304,7 +306,7 @@ const Courses = () => {
                                 </div>
                                 <h3 className="text-xl font-bold text-on-surface mb-2">Can't find what you need?</h3>
                                 <p className="text-sm text-on-surface-variant mb-6 max-w-md mx-auto">
-                                    Use the search bar above to find any topic on YouTube. Type "Next.js", "Figma design", "Rust programming" — we'll fetch playlists instantly!
+                                    Use the search bar above to find any topic on the internet. Type "Next.js", "Figma design", "Rust programming" — we'll fetch courses instantly!
                                 </p>
                                 <div className="flex flex-wrap justify-center gap-2">
                                     {['Next.js', 'Figma', 'Rust', 'Go lang', 'AWS', 'Blockchain', 'Swift iOS'].map((topic) => (
@@ -340,25 +342,36 @@ const EmptySection = ({ message }) => (
 function getFallbackPremium() {
     return [
         {
-            _id: '1', title: 'Complete Web Development Bootcamp',
-            description: 'Learn full-stack web development with HTML, CSS, JavaScript, React, and Node.js.',
-            category: 'Full Stack Development', price: 99.99,
-            instructor: { name: 'John Doe' },
-            image: 'https://images.unsplash.com/photo-1547658719-da2b51169166?w=800&q=80'
+            _id: 'partner-1', title: 'The Complete 2024 Web Development Bootcamp',
+            description: 'Become a Full-Stack Web Developer with just ONE course. HTML, CSS, Javascript, Node, React, PostgreSQL, Web3 and DApps.',
+            category: 'Web Development', price: '94.99',
+            instructor: { name: 'Dr. Angela Yu (Udemy)' },
+            image: 'https://img-c.udemycdn.com/course/480x270/1565838_e54e_18.jpg',
+            externalUrl: 'https://www.udemy.com/course/the-complete-web-development-bootcamp/'
         },
         {
-            _id: '2', title: 'Advanced React Patterns',
-            description: 'Master React by building scalable and maintainable applications with advanced patterns.',
-            category: 'Frontend Development', price: 79.99,
-            instructor: { name: 'Jane Smith' },
-            image: 'https://images.unsplash.com/photo-1633356122544-f134324a6cee?w=800&q=80'
+            _id: 'partner-2', title: 'Arjuna JEE 2024',
+            description: 'India\'s best batch for class 11th IIT JEE prep. Comprehensive curriculum by top educators covering Physics, Chemistry, and Math.',
+            category: 'Test Prep', price: '45.00',
+            instructor: { name: 'Alakh Pandey (Physics Wallah)' },
+            image: 'https://images.unsplash.com/photo-1632559648982-f59ec92de108?w=800&q=80',
+            externalUrl: 'https://www.pw.live/study/batches'
         },
         {
-            _id: '3', title: 'MongoDB Mastery',
-            description: 'Deep dive into MongoDB database design, querying, and aggregation pipelines.',
-            category: 'Database', price: 49.99,
-            instructor: { name: 'Alex Johnson' },
-            image: 'https://images.unsplash.com/photo-1555949963-aa79dcee57d5?w=800&q=80'
+            _id: 'partner-3', title: 'Machine Learning Specialization',
+            description: 'Break into AI with DeepLearning.AI. Learn foundational machine learning concepts, built by Andrew Ng.',
+            category: 'Machine Learning', price: 'Free to audit',
+            instructor: { name: 'Stanford University (Coursera)' },
+            image: 'https://images.unsplash.com/photo-1555949963-aa79dcee57d5?w=800&q=80',
+            externalUrl: 'https://www.coursera.org/specializations/machine-learning-introduction'
+        },
+        {
+            _id: 'partner-4', title: '100 Days of Code: The Complete Python Pro Bootcamp',
+            description: 'Master Python by building 100 projects in 100 days. Learn data science, automation, build websites, games and apps!',
+            category: 'Python', price: '89.99',
+            instructor: { name: 'Dr. Angela Yu (Udemy)' },
+            image: 'https://img-c.udemycdn.com/course/480x270/2776760_f176_10.jpg',
+            externalUrl: 'https://www.udemy.com/course/100-days-of-code/'
         },
     ];
 }
