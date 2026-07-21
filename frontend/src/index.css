@@ -161,6 +161,13 @@
     border: 1px solid rgba(179, 176, 188, 0.2);
   }
 
+  /* ── 3D Tilt ───────────────────────────────── */
+  .tilt-card {
+    transform-style: preserve-3d;
+    will-change: transform;
+    transition: transform 0.15s ease-out;
+  }
+
   /* ── Stagger animation for children ────────── */
   .stagger-children > * {
     animation: slideUp 0.5s ease-out forwards;

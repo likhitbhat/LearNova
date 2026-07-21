@@ -1,7 +1,9 @@
 import { useState, useRef, useEffect, useCallback } from 'react';
 import api from '../services/api';
+import useTilt from '../hooks/useTilt';
 
 const Chatbot = () => {
+    const bubbleTilt = useTilt();
     const [isOpen, setIsOpen] = useState(false);
     const [messages, setMessages] = useState([
         {
@@ -107,7 +109,14 @@ const Chatbot = () => {
             {/* Unread indicator */}
             {!isOpen && (
                 <div className="fixed bottom-[84px] right-6 z-50 animate-slide-up">
-                    <div className="card-elevated !p-3 !rounded-2xl !rounded-br-sm max-w-[220px] cursor-pointer hover:shadow-ambient-lg transition-shadow" onClick={() => setIsOpen(true)}>
+                    <div
+                        ref={bubbleTilt.ref}
+                        onMouseMove={bubbleTilt.onMouseMove}
+                        onMouseLeave={bubbleTilt.onMouseLeave}
+                        style={bubbleTilt.style}
+                        className="card-elevated tilt-card !p-3 !rounded-2xl !rounded-br-sm max-w-[220px] cursor-pointer hover:shadow-ambient-lg transition-shadow"
+                        onClick={() => setIsOpen(true)}
+                    >
                         <p className="text-xs text-on-surface-variant">
                             <span className="font-semibold text-on-surface">LearnBot</span> — Need help finding a course? 👋
                         </p>

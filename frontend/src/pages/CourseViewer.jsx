@@ -2,11 +2,16 @@ import { useContext, useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import AuthContext from '../context/AuthContext';
 import YouTube from 'react-youtube';
+import useTilt from '../hooks/useTilt';
 
+// ponytail: no Scene3D canvas on this page — the video player is the real hero and
+// already competes for GPU/decoding; a second WebGL canvas here is a bad trade.
 const CourseViewer = () => {
     const { id } = useParams(); // this is enrollmentId
     const { user, markComplete, updateProgress } = useContext(AuthContext);
     const navigate = useNavigate();
+    const tilt = useTilt();
+    const errorTilt = useTilt();
 
     const [enrollment, setEnrollment] = useState(null);
     const [videoId, setVideoId] = useState(null);
@@ -90,7 +95,13 @@ const CourseViewer = () => {
     if (error) {
         return (
             <div className="flex flex-col items-center justify-center min-h-[60vh] px-4" id="viewer-error">
-                <div className="card-elevated !p-10 !rounded-3xl text-center max-w-md animate-slide-up">
+                <div
+                    ref={errorTilt.ref}
+                    onMouseMove={errorTilt.onMouseMove}
+                    onMouseLeave={errorTilt.onMouseLeave}
+                    style={errorTilt.style}
+                    className="card-elevated tilt-card !p-10 !rounded-3xl text-center max-w-md animate-slide-up"
+                >
                     <div className="w-16 h-16 rounded-2xl bg-red-50 flex items-center justify-center mx-auto mb-5">
                         <span className="material-icons-round text-3xl text-error">error</span>
                     </div>
@@ -202,7 +213,14 @@ const CourseViewer = () => {
             </div>
 
             {/* ── Progress Section ────────────────────────── */}
-            <div className="card-elevated !rounded-2xl animate-slide-up" style={{ animationDelay: '0.2s' }} id="progress-section">
+            <div
+                ref={tilt.ref}
+                onMouseMove={tilt.onMouseMove}
+                onMouseLeave={tilt.onMouseLeave}
+                style={{ ...tilt.style, animationDelay: '0.2s' }}
+                className="card-elevated tilt-card !rounded-2xl animate-slide-up"
+                id="progress-section"
+            >
                 <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                     <div className="flex items-center gap-3">
                         <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${

@@ -1,10 +1,12 @@
 import { Link, useNavigate } from 'react-router-dom';
 import { useContext, useState } from 'react';
 import AuthContext from '../context/AuthContext';
+import useTilt from '../hooks/useTilt';
 
 const CourseCard = ({ course, enrollmentId, progress }) => {
     const { user, enroll, markComplete, unenroll } = useContext(AuthContext);
     const navigate = useNavigate();
+    const tilt = useTilt();
     const [enrolling, setEnrolling] = useState(false);
     const [removing, setRemoving] = useState(false);
     const [showConfirm, setShowConfirm] = useState(false);
@@ -83,7 +85,14 @@ const CourseCard = ({ course, enrollmentId, progress }) => {
 
     return (
         <>
-            <div className="card-elevated group relative overflow-hidden" id={`course-card-${course._id}`}>
+            <div
+                ref={tilt.ref}
+                onMouseMove={tilt.onMouseMove}
+                onMouseLeave={tilt.onMouseLeave}
+                style={tilt.style}
+                className="card-elevated tilt-card group relative overflow-hidden"
+                id={`course-card-${course._id}`}
+            >
                 {/* Image Section */}
                 <div className="relative -mx-6 -mt-6 mb-5 overflow-hidden rounded-t-2xl">
                     <img

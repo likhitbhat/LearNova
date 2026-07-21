@@ -1,6 +1,8 @@
-import { useState, useContext, useEffect } from 'react';
+import { useState, useContext, useEffect, useRef } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import AuthContext from '../context/AuthContext';
+import Scene3D from '../three/Scene3D';
+import useTilt from '../hooks/useTilt';
 
 const Login = () => {
     const [email, setEmail] = useState('');
@@ -8,8 +10,10 @@ const Login = () => {
     const [error, setError] = useState('');
     const [loading, setLoading] = useState(false);
     const [showPassword, setShowPassword] = useState(false);
+    const trustTilt = useTilt();
+    const googleBtnRef = useRef(null);
 
-    const { login, user } = useContext(AuthContext);
+    const { login, googleLogin, user } = useContext(AuthContext);
     const navigate = useNavigate();
 
     useEffect(() => {
@@ -17,6 +21,40 @@ const Login = () => {
             navigate('/dashboard');
         }
     }, [user, navigate]);
+
+    // Renders Google's own Sign-In button via the Identity Services script.
+    // ponytail: no npm package for this — GIS is a two-line native script + button, adding a wrapper lib would be pure overhead.
+    useEffect(() => {
+        const clientId = import.meta.env.VITE_GOOGLE_CLIENT_ID;
+        if (!clientId || user) return;
+
+        const handleCredential = async (response) => {
+            setError('');
+            try {
+                await googleLogin(response.credential);
+            } catch (err) {
+                setError(err);
+            }
+        };
+
+        const renderButton = () => {
+            window.google.accounts.id.initialize({ client_id: clientId, callback: handleCredential });
+            window.google.accounts.id.renderButton(googleBtnRef.current, {
+                theme: 'outline', size: 'large', width: 360, text: 'continue_with',
+            });
+        };
+
+        if (window.google?.accounts?.id) {
+            renderButton();
+            return;
+        }
+        const script = document.createElement('script');
+        script.src = 'https://accounts.google.com/gsi/client';
+        script.async = true;
+        script.onload = renderButton;
+        document.body.appendChild(script);
+        return () => script.remove();
+    }, [user, googleLogin]);
 
     const submitHandler = async (e) => {
         e.preventDefault();
@@ -33,10 +71,10 @@ const Login = () => {
     };
 
     return (
-        <div className="min-h-[calc(100vh-80px)] flex items-center justify-center px-4 py-12" id="login-page">
-            {/* Background orbs */}
-            <div className="fixed top-20 -left-32 w-[400px] h-[400px] rounded-full bg-primary-200/20 blur-3xl pointer-events-none" />
-            <div className="fixed bottom-0 right-0 w-[300px] h-[300px] rounded-full bg-secondary-200/15 blur-3xl pointer-events-none" />
+        <div className="relative min-h-[calc(100vh-80px)] flex items-center justify-center px-4 py-12 overflow-hidden" id="login-page">
+            <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[420px] h-[420px] pointer-events-none">
+                <Scene3D variant="blob" className="opacity-25" />
+            </div>
 
             <div className="w-full max-w-md relative animate-slide-up">
                 {/* Header */}
@@ -127,6 +165,17 @@ const Login = () => {
                         </button>
                     </form>
 
+                    {import.meta.env.VITE_GOOGLE_CLIENT_ID && (
+                        <>
+                            <div className="flex items-center gap-3 my-6">
+                                <div className="h-px flex-1 bg-outline-variant/30" />
+                                <span className="text-xs text-on-surface-variant">or</span>
+                                <div className="h-px flex-1 bg-outline-variant/30" />
+                            </div>
+                            <div ref={googleBtnRef} className="flex justify-center" id="google-login-btn" />
+                        </>
+                    )}
+
                     <div className="mt-6 text-center">
                         <p className="text-sm text-on-surface-variant">
                             New to the academy?{' '}
@@ -139,7 +188,13 @@ const Login = () => {
 
                 {/* Social Proof */}
                 <div className="mt-8 text-center">
-                    <div className="card-tonal !p-4 !rounded-2xl inline-flex items-center gap-3">
+                    <div
+                        ref={trustTilt.ref}
+                        onMouseMove={trustTilt.onMouseMove}
+                        onMouseLeave={trustTilt.onMouseLeave}
+                        style={trustTilt.style}
+                        className="card-tonal tilt-card !p-4 !rounded-2xl inline-flex items-center gap-3"
+                    >
                         <span className="material-icons-round text-primary-500 text-lg">public</span>
                         <p className="text-sm text-on-surface-variant">
                             <span className="font-semibold text-on-surface">50k+</span> peers worldwide

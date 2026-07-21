@@ -1,8 +1,11 @@
 import { useState, useEffect, useCallback } from 'react';
 import api from '../services/api';
 import CourseCard from '../components/CourseCard';
+import Scene3D from '../three/Scene3D';
+import useTilt from '../hooks/useTilt';
 
 const Courses = () => {
+    const exploreCtaTilt = useTilt();
     const [premiumCourses, setPremiumCourses] = useState([]);
     const [discoveredCourses, setDiscoveredCourses] = useState([]);
     const [searchResults, setSearchResults] = useState([]);
@@ -111,20 +114,25 @@ const Courses = () => {
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
 
                 {/* ── Page Header ─────────────────────────── */}
-                <div className="text-center mb-10 animate-slide-up">
-                    <span className="chip-primary mb-4 inline-block">
-                        <span className="material-icons-round text-xs mr-1">explore</span>
-                        Course Catalog
-                    </span>
-                    <h1 className="text-3xl md:text-4xl lg:text-5xl font-bold text-on-surface mb-4 tracking-tight">
-                        Master the Art of
-                        <span className="block bg-gradient-to-r from-primary-600 to-tertiary-500 bg-clip-text text-transparent">
-                            Continuous Discovery.
+                <div className="relative text-center mb-10 animate-slide-up">
+                    <div className="absolute inset-x-0 top-0 h-48 pointer-events-none">
+                        <Scene3D variant="torus" className="opacity-40" />
+                    </div>
+                    <div className="relative z-10">
+                        <span className="chip-primary mb-4 inline-block">
+                            <span className="material-icons-round text-xs mr-1">explore</span>
+                            Course Catalog
                         </span>
-                    </h1>
-                    <p className="text-lg text-on-surface-variant max-w-2xl mx-auto">
-                        Courses auto-fetched from YouTube, Coursera, Udemy and more — always fresh, always free.
-                    </p>
+                        <h1 className="text-3xl md:text-4xl lg:text-5xl font-bold text-on-surface mb-4 tracking-tight">
+                            Master the Art of
+                            <span className="block bg-gradient-to-r from-primary-600 to-tertiary-500 bg-clip-text text-transparent">
+                                Continuous Discovery.
+                            </span>
+                        </h1>
+                        <p className="text-lg text-on-surface-variant max-w-2xl mx-auto">
+                            Courses auto-fetched from YouTube, Coursera, Udemy and more — always fresh, always free.
+                        </p>
+                    </div>
                 </div>
 
                 {/* ── Search & Filter Bar ─────────────────── */}
@@ -300,7 +308,13 @@ const Courses = () => {
 
                         {/* ── Explore More CTA ───────────────── */}
                         <section className="mb-16 animate-slide-up" style={{ animationDelay: '0.25s' }}>
-                            <div className="card-tonal !rounded-3xl !p-8 md:!p-12 text-center">
+                            <div
+                                ref={exploreCtaTilt.ref}
+                                onMouseMove={exploreCtaTilt.onMouseMove}
+                                onMouseLeave={exploreCtaTilt.onMouseLeave}
+                                style={exploreCtaTilt.style}
+                                className="card-tonal tilt-card !rounded-3xl !p-8 md:!p-12 text-center"
+                            >
                                 <div className="w-14 h-14 rounded-2xl bg-primary-50 flex items-center justify-center mx-auto mb-5">
                                     <span className="material-icons-round text-2xl text-primary-600">travel_explore</span>
                                 </div>
@@ -332,12 +346,21 @@ const Courses = () => {
     );
 };
 
-const EmptySection = ({ message }) => (
-    <div className="card-tonal !rounded-2xl !p-8 text-center">
-        <span className="material-icons-round text-3xl text-on-surface-variant/40 mb-3 block">search_off</span>
-        <p className="text-sm text-on-surface-variant">{message}</p>
-    </div>
-);
+const EmptySection = ({ message }) => {
+    const tilt = useTilt();
+    return (
+        <div
+            ref={tilt.ref}
+            onMouseMove={tilt.onMouseMove}
+            onMouseLeave={tilt.onMouseLeave}
+            style={tilt.style}
+            className="card-tonal tilt-card !rounded-2xl !p-8 text-center"
+        >
+            <span className="material-icons-round text-3xl text-on-surface-variant/40 mb-3 block">search_off</span>
+            <p className="text-sm text-on-surface-variant">{message}</p>
+        </div>
+    );
+};
 
 function getFallbackPremium() {
     return [

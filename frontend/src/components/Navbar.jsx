@@ -38,8 +38,8 @@ const Navbar = () => {
             <div className="max-w-7xl mx-auto px-6 lg:px-8">
                 <div className="flex justify-between items-center">
                     {/* Logo */}
-                    <Link to="/" className="flex items-center gap-2 group" id="nav-logo">
-                        <div className="w-9 h-9 rounded-xl bg-gradient-primary flex items-center justify-center shadow-glow transition-transform duration-300 group-hover:scale-110">
+                    <Link to="/" className="flex items-center gap-2 group" id="nav-logo" style={{ perspective: '400px' }}>
+                        <div className="w-9 h-9 rounded-xl bg-gradient-primary flex items-center justify-center shadow-glow transition-transform duration-500 group-hover:[transform:rotateY(180deg)]">
                             <span className="material-icons-round text-white text-lg">auto_awesome</span>
                         </div>
                         <span className="text-xl font-bold text-on-surface tracking-tight">
@@ -49,7 +49,7 @@ const Navbar = () => {
 
                     {/* Desktop Navigation */}
                     <div className="hidden md:flex items-center gap-1">
-                        <NavLink to="/" active={isActive('/')} label="Home" />
+                        {!user && <NavLink to="/" active={isActive('/')} label="Home" />}
                         <NavLink to="/courses" active={isActive('/courses')} label="Explore" />
                         {user && (
                             <NavLink to="/dashboard" active={isActive('/dashboard')} label="Dashboard" />
@@ -114,7 +114,7 @@ const Navbar = () => {
                 {mobileOpen && (
                     <div className="md:hidden mt-4 pb-4 animate-fade-in">
                         <div className="flex flex-col gap-1">
-                            <MobileNavLink to="/" active={isActive('/')} label="Home" icon="home" />
+                            {!user && <MobileNavLink to="/" active={isActive('/')} label="Home" icon="home" />}
                             <MobileNavLink to="/courses" active={isActive('/courses')} label="Explore Courses" icon="explore" />
                             {user && (
                                 <MobileNavLink to="/dashboard" active={isActive('/dashboard')} label="Dashboard" icon="dashboard" />

@@ -1,6 +1,7 @@
 import { useState, useContext, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import AuthContext from '../context/AuthContext';
+import Scene3D from '../three/Scene3D';
 
 const Register = () => {
     const [name, setName] = useState('');
@@ -38,10 +39,10 @@ const Register = () => {
     };
 
     return (
-        <div className="min-h-[calc(100vh-80px)] flex items-center justify-center px-4 py-12" id="register-page">
-            {/* Background orbs */}
-            <div className="fixed top-20 right-0 w-[400px] h-[400px] rounded-full bg-secondary-200/20 blur-3xl pointer-events-none" />
-            <div className="fixed bottom-0 left-0 w-[300px] h-[300px] rounded-full bg-primary-200/15 blur-3xl pointer-events-none" />
+        <div className="relative min-h-[calc(100vh-80px)] flex items-center justify-center px-4 py-12 overflow-hidden" id="register-page">
+            <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[420px] h-[420px] pointer-events-none">
+                <Scene3D variant="blob" color="#a78bfa" className="opacity-25" />
+            </div>
 
             <div className="w-full max-w-md relative animate-slide-up">
                 {/* Header */}

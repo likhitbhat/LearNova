@@ -1,17 +1,35 @@
-import { Link } from 'react-router-dom';
-import { useContext } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
+import { useContext, useEffect } from 'react';
 import AuthContext from '../context/AuthContext';
+import Scene3D from '../three/Scene3D';
+import useTilt from '../hooks/useTilt';
 
 const Home = () => {
     const { user } = useContext(AuthContext);
+    const navigate = useNavigate();
+    const heroTilt1 = useTilt();
+    const heroTilt2 = useTilt();
+    const heroTilt3 = useTilt();
+
+    useEffect(() => {
+        if (user) {
+            navigate('/dashboard', { replace: true });
+        }
+    }, [user, navigate]);
+
+    if (user) {
+        return null;
+    }
 
     return (
         <div className="bg-surface">
             {/* ── Hero Section ────────────────────────────── */}
             <section className="relative overflow-hidden" id="hero-section">
-                {/* Background Orbs */}
-                <div className="absolute top-20 -left-40 w-[500px] h-[500px] rounded-full bg-primary-200/30 blur-3xl animate-pulse-soft" />
-                <div className="absolute bottom-0 right-0 w-[400px] h-[400px] rounded-full bg-secondary-200/20 blur-3xl animate-pulse-soft" style={{ animationDelay: '1.5s' }} />
+                {/* Background Orb */}
+                <div className="absolute bottom-0 right-0 w-[400px] h-[400px] rounded-full bg-secondary-200/20 blur-3xl animate-pulse-soft" />
+                <div className="absolute top-1/2 right-0 -translate-y-1/2 w-[520px] h-[520px] hidden lg:block">
+                    <Scene3D variant="blob" className="opacity-60" />
+                </div>
 
                 <div className="max-w-7xl mx-auto px-6 lg:px-8 py-24 lg:py-36 relative">
                     <div className="grid lg:grid-cols-2 gap-16 items-center">
@@ -65,23 +83,37 @@ const Home = () => {
                         <div className="relative hidden lg:block" style={{ animationDelay: '0.2s' }}>
                             <div className="animate-slide-up space-y-4">
                                 {/* Featured Course Card */}
-                                <div className="card-elevated !p-5 !rounded-3xl animate-float">
-                                    <div className="flex items-start gap-4">
-                                        <div className="w-16 h-16 rounded-2xl bg-gradient-primary flex items-center justify-center flex-shrink-0">
-                                            <span className="material-icons-round text-white text-2xl">design_services</span>
-                                        </div>
-                                        <div>
-                                            <h3 className="font-semibold text-on-surface mb-1">Advanced UI Design</h3>
-                                            <p className="text-sm text-on-surface-variant mb-2">Learn editorial layouts & color theory</p>
-                                            <div className="progress-track w-32">
-                                                <div className="progress-bar" style={{ width: '72%' }} />
+                                <div className="animate-float">
+                                    <div
+                                        ref={heroTilt1.ref}
+                                        onMouseMove={heroTilt1.onMouseMove}
+                                        onMouseLeave={heroTilt1.onMouseLeave}
+                                        style={heroTilt1.style}
+                                        className="card-elevated tilt-card !p-5 !rounded-3xl"
+                                    >
+                                        <div className="flex items-start gap-4">
+                                            <div className="w-16 h-16 rounded-2xl bg-gradient-primary flex items-center justify-center flex-shrink-0">
+                                                <span className="material-icons-round text-white text-2xl">design_services</span>
+                                            </div>
+                                            <div>
+                                                <h3 className="font-semibold text-on-surface mb-1">Advanced UI Design</h3>
+                                                <p className="text-sm text-on-surface-variant mb-2">Learn editorial layouts & color theory</p>
+                                                <div className="progress-track w-32">
+                                                    <div className="progress-bar" style={{ width: '72%' }} />
+                                                </div>
                                             </div>
                                         </div>
                                     </div>
                                 </div>
 
                                 {/* Stats Card */}
-                                <div className="card-elevated !p-5 !rounded-3xl ml-12" style={{ animationDelay: '1s' }}>
+                                <div
+                                    ref={heroTilt2.ref}
+                                    onMouseMove={heroTilt2.onMouseMove}
+                                    onMouseLeave={heroTilt2.onMouseLeave}
+                                    style={{ ...heroTilt2.style, animationDelay: '1s' }}
+                                    className="card-elevated tilt-card !p-5 !rounded-3xl ml-12"
+                                >
                                     <div className="flex items-center gap-4">
                                         <div className="w-12 h-12 rounded-xl bg-emerald-50 flex items-center justify-center">
                                             <span className="material-icons-round text-emerald-600 text-xl">trending_up</span>
@@ -94,14 +126,22 @@ const Home = () => {
                                 </div>
 
                                 {/* Achievement Card */}
-                                <div className="card-elevated !p-4 !rounded-3xl mr-8 animate-float" style={{ animationDelay: '3s' }}>
-                                    <div className="flex items-center gap-3">
-                                        <div className="w-10 h-10 rounded-xl bg-secondary-container flex items-center justify-center">
-                                            <span className="material-icons-round text-secondary-600">workspace_premium</span>
-                                        </div>
-                                        <div>
-                                            <p className="text-sm font-semibold text-on-surface">Master Learner</p>
-                                            <p className="text-xs text-on-surface-variant">Top 5% this month</p>
+                                <div className="animate-float" style={{ animationDelay: '3s' }}>
+                                    <div
+                                        ref={heroTilt3.ref}
+                                        onMouseMove={heroTilt3.onMouseMove}
+                                        onMouseLeave={heroTilt3.onMouseLeave}
+                                        style={heroTilt3.style}
+                                        className="card-elevated tilt-card !p-4 !rounded-3xl mr-8"
+                                    >
+                                        <div className="flex items-center gap-3">
+                                            <div className="w-10 h-10 rounded-xl bg-secondary-container flex items-center justify-center">
+                                                <span className="material-icons-round text-secondary-600">workspace_premium</span>
+                                            </div>
+                                            <div>
+                                                <p className="text-sm font-semibold text-on-surface">Master Learner</p>
+                                                <p className="text-xs text-on-surface-variant">Top 5% this month</p>
+                                            </div>
                                         </div>
                                     </div>
                                 </div>
@@ -154,39 +194,7 @@ const Home = () => {
                                 tag: 'Python'
                             }
                         ].map((course, i) => (
-                            <a
-                                key={i}
-                                href={course.href}
-                                target="_blank"
-                                rel="noopener noreferrer"
-                                className="card-elevated group overflow-hidden !p-0"
-                                id={`featured-course-${i}`}
-                            >
-                                <div className="relative overflow-hidden rounded-t-2xl">
-                                    <img
-                                        src={course.img}
-                                        alt={course.title}
-                                        className="w-full h-48 object-cover group-hover:scale-105 transition-transform duration-500"
-                                        loading="lazy"
-                                    />
-                                    <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent" />
-                                    <div className="absolute top-3 left-3">
-                                        <span className="chip backdrop-blur-sm !bg-red-500/90 !text-white text-[10px]">
-                                            <svg className="w-3 h-3 mr-1" fill="currentColor" viewBox="0 0 24 24">
-                                                <path d="M19.615 3.184c-3.604-.246-11.631-.245-15.23 0-3.897.266-4.356 2.62-4.385 8.816.029 6.185.484 8.549 4.385 8.816 3.6.245 11.626.246 15.23 0 3.897-.266 4.356-2.62 4.385-8.816-.029-6.185-.484-8.549-4.385-8.816zm-10.615 12.816v-8l8 3.993-8 4.007z" />
-                                            </svg>
-                                            Playlist
-                                        </span>
-                                    </div>
-                                </div>
-                                <div className="p-5">
-                                    <span className="chip-secondary text-[10px] mb-3">{course.tag}</span>
-                                    <h3 className="text-base font-semibold text-on-surface mb-2 group-hover:text-primary-600 transition-colors line-clamp-2">
-                                        {course.title}
-                                    </h3>
-                                    <p className="text-sm text-on-surface-variant line-clamp-2 leading-relaxed">{course.desc}</p>
-                                </div>
-                            </a>
+                            <FeaturedCourseCard key={i} course={course} i={i} />
                         ))}
                     </div>
 
@@ -233,13 +241,7 @@ const Home = () => {
                                 color: 'bg-emerald-50 text-emerald-600'
                             }
                         ].map((feature, i) => (
-                            <div key={i} className="card-elevated text-center group !p-8" id={`feature-${i}`}>
-                                <div className={`w-14 h-14 rounded-2xl ${feature.color} flex items-center justify-center mx-auto mb-5 group-hover:scale-110 transition-transform duration-300`}>
-                                    <span className="material-icons-round text-2xl">{feature.icon}</span>
-                                </div>
-                                <h3 className="text-lg font-semibold text-on-surface mb-3">{feature.title}</h3>
-                                <p className="text-sm text-on-surface-variant leading-relaxed">{feature.desc}</p>
-                            </div>
+                            <FeatureCard key={i} feature={feature} i={i} />
                         ))}
                     </div>
                 </div>
@@ -272,6 +274,68 @@ const Home = () => {
                     </div>
                 </div>
             </section>
+        </div>
+    );
+};
+
+const FeaturedCourseCard = ({ course, i }) => {
+    const tilt = useTilt();
+    return (
+        <a
+            ref={tilt.ref}
+            onMouseMove={tilt.onMouseMove}
+            onMouseLeave={tilt.onMouseLeave}
+            style={tilt.style}
+            href={course.href}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="card-elevated tilt-card group overflow-hidden !p-0"
+            id={`featured-course-${i}`}
+        >
+            <div className="relative overflow-hidden rounded-t-2xl">
+                <img
+                    src={course.img}
+                    alt={course.title}
+                    className="w-full h-48 object-cover group-hover:scale-105 transition-transform duration-500"
+                    loading="lazy"
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent" />
+                <div className="absolute top-3 left-3">
+                    <span className="chip backdrop-blur-sm !bg-red-500/90 !text-white text-[10px]">
+                        <svg className="w-3 h-3 mr-1" fill="currentColor" viewBox="0 0 24 24">
+                            <path d="M19.615 3.184c-3.604-.246-11.631-.245-15.23 0-3.897.266-4.356 2.62-4.385 8.816.029 6.185.484 8.549 4.385 8.816 3.6.245 11.626.246 15.23 0 3.897-.266 4.356-2.62 4.385-8.816-.029-6.185-.484-8.549-4.385-8.816zm-10.615 12.816v-8l8 3.993-8 4.007z" />
+                        </svg>
+                        Playlist
+                    </span>
+                </div>
+            </div>
+            <div className="p-5">
+                <span className="chip-secondary text-[10px] mb-3">{course.tag}</span>
+                <h3 className="text-base font-semibold text-on-surface mb-2 group-hover:text-primary-600 transition-colors line-clamp-2">
+                    {course.title}
+                </h3>
+                <p className="text-sm text-on-surface-variant line-clamp-2 leading-relaxed">{course.desc}</p>
+            </div>
+        </a>
+    );
+};
+
+const FeatureCard = ({ feature, i }) => {
+    const tilt = useTilt();
+    return (
+        <div
+            ref={tilt.ref}
+            onMouseMove={tilt.onMouseMove}
+            onMouseLeave={tilt.onMouseLeave}
+            style={tilt.style}
+            className="card-elevated tilt-card text-center group !p-8"
+            id={`feature-${i}`}
+        >
+            <div className={`w-14 h-14 rounded-2xl ${feature.color} flex items-center justify-center mx-auto mb-5 group-hover:scale-110 transition-transform duration-300`}>
+                <span className="material-icons-round text-2xl">{feature.icon}</span>
+            </div>
+            <h3 className="text-lg font-semibold text-on-surface mb-3">{feature.title}</h3>
+            <p className="text-sm text-on-surface-variant leading-relaxed">{feature.desc}</p>
         </div>
     );
 };

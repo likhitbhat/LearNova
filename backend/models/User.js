@@ -14,7 +14,15 @@ const userSchema = new mongoose.Schema(
         },
         password: {
             type: String,
-            required: true,
+            // not required for Google-authenticated accounts
+            required: function () {
+                return !this.googleId;
+            },
+        },
+        googleId: {
+            type: String,
+            unique: true,
+            sparse: true,
         },
         role: {
             type: String,
@@ -50,11 +58,12 @@ const userSchema = new mongoose.Schema(
 );
 
 userSchema.methods.matchPassword = async function (enteredPassword) {
+    if (!this.password) return false; // Google-only account, no password set
     return await bcrypt.compare(enteredPassword, this.password);
 };
 
 userSchema.pre('save', async function () {
-    if (!this.isModified('password')) {
+    if (!this.password || !this.isModified('password')) {
         return;
     }
 

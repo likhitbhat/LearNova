@@ -10,13 +10,7 @@ const searchPlaylists = async (query, maxResults = 12) => {
     const apiKey = process.env.YOUTUBE_API_KEY;
     if (!apiKey || apiKey === 'YOUR_YOUTUBE_API_KEY_HERE') {
         console.warn('⚠️ YOUTUBE_API_KEY not configured. Returning fallback mock courses for search.');
-        const allFallbacks = getFallbackCourses();
-        const lowerQuery = query.toLowerCase();
-        const filtered = allFallbacks.filter(c => 
-            c.title.toLowerCase().includes(lowerQuery) || 
-            c.category.toLowerCase().includes(lowerQuery)
-        );
-        return filtered.length > 0 ? filtered : allFallbacks.slice(0, 3); // return some so UI doesn't look completely broken
+        return getFallbackForQuery(query);
     }
 
     try {
@@ -71,12 +65,28 @@ const searchPlaylists = async (query, maxResults = 12) => {
             };
         });
     } catch (error) {
-        if (error.response?.status === 403) {
-            throw new Error('YouTube API quota exceeded or key is invalid.');
+        // ponytail: a bad/expired/quota-exhausted key is a config problem, not a request
+        // failure — degrade to curated fallback instead of breaking every caller (trending + search).
+        if (error.response?.status === 403 || error.response?.status === 400) {
+            console.warn(`⚠️ YouTube API key rejected (${error.response.status}: ${error.response.data?.error?.message || 'unknown'}). Returning fallback courses.`);
+            return getFallbackForQuery(query);
         }
         throw error;
     }
 };
+
+/**
+ * Curated fallback courses filtered to loosely match a search query.
+ */
+function getFallbackForQuery(query) {
+    const allFallbacks = getFallbackCourses();
+    const lowerQuery = query.toLowerCase();
+    const filtered = allFallbacks.filter(c =>
+        c.title.toLowerCase().includes(lowerQuery) ||
+        c.category.toLowerCase().includes(lowerQuery)
+    );
+    return filtered.length > 0 ? filtered : allFallbacks.slice(0, 3); // return some so UI doesn't look completely broken
+}
 
 /**
  * Get trending / popular educational playlists across multiple categories.

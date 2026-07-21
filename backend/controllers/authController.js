@@ -1,5 +1,8 @@
+const { OAuth2Client } = require('google-auth-library');
 const User = require('../models/User');
 const generateToken = require('../utils/generateToken');
+
+const googleClient = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
 
 // @desc    Register a new user
 // @route   POST /api/auth/register
@@ -60,6 +63,55 @@ const loginUser = async (req, res, next) => {
             throw new Error('Invalid email or password');
         }
     } catch (error) {
+        next(error);
+    }
+};
+
+// @desc    Auth user via Google Sign-In (find-or-create) & get token
+// @route   POST /api/auth/google
+// @access  Public
+const googleAuth = async (req, res, next) => {
+    try {
+        const { credential } = req.body;
+        if (!credential) {
+            res.status(400);
+            throw new Error('Missing Google credential');
+        }
+        if (!process.env.GOOGLE_CLIENT_ID) {
+            res.status(500);
+            throw new Error('Google Sign-In is not configured on the server');
+        }
+
+        const ticket = await googleClient.verifyIdToken({
+            idToken: credential,
+            audience: process.env.GOOGLE_CLIENT_ID,
+        });
+        const { sub: googleId, email, name } = ticket.getPayload();
+
+        let user = await User.findOne({ googleId });
+        if (!user) {
+            // Link to an existing email/password account, or create a fresh one
+            user = await User.findOne({ email });
+            if (user) {
+                user.googleId = googleId;
+                await user.save();
+            } else {
+                user = await User.create({ name, email, googleId });
+            }
+        }
+
+        res.json({
+            _id: user._id,
+            name: user.name,
+            email: user.email,
+            role: user.role,
+            token: generateToken(user._id),
+        });
+    } catch (error) {
+        if (error.message?.includes('Token used too late') || error.message?.includes('Wrong recipient')) {
+            res.status(401);
+            error.message = 'Invalid or expired Google credential';
+        }
         next(error);
     }
 };
@@ -236,6 +288,7 @@ const unenrollCourse = async (req, res, next) => {
 module.exports = {
     registerUser,
     loginUser,
+    googleAuth,
     getUserProfile,
     enrollCourse,
     markCourseComplete,
